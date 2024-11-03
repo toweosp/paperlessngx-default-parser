@@ -124,7 +124,11 @@ class DefaultDocumentParser(DocumentParser):
                 route.pdf_format(PdfAFormat.A3b)
 
             try:
-                response = route.string_index(content).run()
+                index_file_path = Path(self.tempdir) / "index.html"
+                with open(index_file_path,'x') as index_file:
+                    index_file.write(content)
+                    index_file.close()
+                response = route.index(index_file_path).run()
                 response.to_file(pdf_path)
 
                 return pdf_path
