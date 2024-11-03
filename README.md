@@ -1,0 +1,1 @@
+# paperlessngx-default-parser
