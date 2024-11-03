@@ -12,8 +12,11 @@ If a file with known encoding is parsed, the content of this file is read and st
 
     Download original file to work with it.
 
+## Prerequisites
+This parser requires Gotenberg to be configured for Paperless-ngx.
+
 ## Installation
-Theses installation instructions are for docker based installation. For bare metal installations you have to do analogous steps manually, i.e. install the dependencies listed in `org_toweosp_paperlessngx_default_parser.sh` and copy/link the source folder to your installation folder.  
+These installation instructions are for docker based installation. For bare metal installations you have to do analogous steps manually, i.e. install the dependencies listed in `org_toweosp_paperlessngx_default_parser.sh` and copy/link the source folder to your installation folder.  
 
 1. Download current release or clone repository to a _folder_ of your choice.
 

@@ -6,13 +6,16 @@ from PIL import ImageDraw
 from PIL import ImageFont
 
 from documents.parsers import DocumentParser
+from documents.parsers import ParseError
 
-from fpdf import FPDF
 from datetime import datetime
 
 from string import Template
 
-from django.utils.timezone import make_aware
+from pathlib import Path
+from gotenberg_client import GotenbergClient
+from gotenberg_client.options import PdfAFormat
+from paperless.models import OutputTypeChoices
 
 
 
@@ -26,15 +29,28 @@ class DefaultDocumentParser(DocumentParser):
 
     logging_name = "paperless.parsing.org_toweosp_paperlessngx_default_parser"
 
+    html_note = Template(
+    '''
+    <HTML>
+    This document was archived by a default parser for Paperless-ngx. 
+    <p>
+    <b>original file name:</b> $file_name<br>
+    <b>mime type:</b> $mime_type<br>
+    <p>
+    Download original file to work with it.
+    </HTML>
+    ''')
+
     note = Template(
     '''
     This document was archived by a default parser for Paperless-ngx. 
-    
+
     original file name: $file_name
     mime type: $mime_type
-    
+
     Download original file to work with it.
     ''')
+
 
     def get_thumbnail(self, document_path, mime_type, file_name=None):
         img = Image.new("RGB", (500, 700), color="white")
@@ -52,9 +68,6 @@ class DefaultDocumentParser(DocumentParser):
         return out_path
 
     def parse(self, document_path, mime_type, file_name=None):
-        # TODO: prüfen, ob benötigt, da immer Datum der Erzeugung der Datei, was beim Upload der aktuelle Tag ist
-        self.date = make_aware(datetime.fromtimestamp(os.path.getmtime(document_path)))
-
         from chardet.universaldetector import UniversalDetector
         detector = UniversalDetector()
         for line in open(document_path, 'rb'):
@@ -62,24 +75,65 @@ class DefaultDocumentParser(DocumentParser):
             if detector.done: break
         detector.close()
 
-        self.text=''        
+
+        pdf_output = self.html_note.substitute(mime_type = mime_type, file_name = file_name)
+        self.text = ''
         encoding = detector.result['encoding']
         if(encoding):
             try:
                 with open(document_path, 'r', encoding=encoding) as file:
                     self.text = file.read()
+                    pdf_output = self.text
+                    file.close()
+                    # deal with postgresql not allowing NUL bytes in text fields. In this case let self.text be empty
+                    # and create PDF with default note
+                    if '\x00' not in self.text: 
+                        pdf_output = f'<HTML><pre>{pdf_output}</pre></HTML>'
+                    else:
+                        self.text = ''
+                        pdf_output = self.html_note.substitute(mime_type = mime_type, file_name = file_name)
             except Exception:
-                # if there is any exception while reading the file with the guessed encoding let self.text be empty
-                pass 
+                # if there is any exception while reading the file with the guessed encoding use the
+                # default values for self.text and pdf_output as already defined
+                pass
 
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_font("Arial", size=10)
-        parts = self.text.split('\n') if self.text else self.note.substitute(mime_type = mime_type, file_name = file_name).split('\n')
-        for p in parts:
-            pdf.cell(w = 0,h = 10,txt = p, ln = 1, align = 'L')
-        pdf.output(os.path.join(self.tempdir,"archived.pdf"))
-        self.archive_path = os.path.join(self.tempdir, "archived.pdf")
+        self.archive_path = self.convert_to_pdf(pdf_output)
+
+    def convert_to_pdf(self, content: str):
+        pdf_path = Path(self.tempdir) / "convert.pdf"
+
+        with (
+            GotenbergClient(
+                host=settings.TIKA_GOTENBERG_ENDPOINT,
+                timeout=settings.CELERY_TASK_TIME_LIMIT,
+            ) as client,
+            client.chromium.html_to_pdf() as route,
+        ):
+            # Set the output format of the resulting PDF
+            if settings.OCR_OUTPUT_TYPE in {
+                OutputTypeChoices.PDF_A,
+                OutputTypeChoices.PDF_A2,
+            }:
+                route.pdf_format(PdfAFormat.A2b)
+            elif settings.OCR_OUTPUT_TYPE == OutputTypeChoices.PDF_A1:
+                self.log.warning(
+                    "Gotenberg does not support PDF/A-1a, choosing PDF/A-2b instead",
+                )
+                route.pdf_format(PdfAFormat.A2b)
+            elif settings.OCR_OUTPUT_TYPE == OutputTypeChoices.PDF_A3:
+                route.pdf_format(PdfAFormat.A3b)
+
+            try:
+                response = route.string_index(content).run()
+                response.to_file(pdf_path)
+
+                return pdf_path
+
+            except Exception as err:
+                raise ParseError(
+                    f"Error while converting document to PDF: {err}",
+                ) from err
+
 
     def get_settings(self):
         """
