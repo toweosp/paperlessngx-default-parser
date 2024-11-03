@@ -129,7 +129,7 @@ class DefaultDocumentParser(DocumentParser):
                     index_file.write(content)
                     index_file.close()
                 response = route.index(index_file_path).run()
-                response.to_file(pdf_path)
+                pdf_path.write_bytes(response.content)
 
                 return pdf_path
 
