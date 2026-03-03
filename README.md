@@ -16,40 +16,24 @@ If a file with known encoding is parsed, the content of this file is read and st
 This parser requires Gotenberg to be configured for Paperless-ngx.
 
 ## Installation
-These installation instructions are for docker based installation. For bare metal installations you have to do analogous steps manually, i.e. install the dependencies listed in `org_toweosp_paperlessngx_default_parser.sh` and copy/link the source folder to your installation folder.  
 
-1. Download current release or clone repository to a _folder_ of your choice.
+1. Install using PyPI
 
-2. Use custom container initialization as described here: https://docs.paperless-ngx.com/advanced_usage/#custom-container-initialization
-   
-   Place the script `org_toweosp_paperlessngx_default_parser.sh` in the directory for your container initialization scripts and make it executable.
+    `pip install paperlessngx-default-parser`
 
-   This script will install the required python modules. It also contains an example to add additional mime types, see [Limitations](#limitations).
+    For docker based installations use custom container initialization as described here: https://docs.paperless-ngx.com/advanced_usage/#custom-container-initialization
 
-3. Bind folder `org_toweosp_paperlessngx_default_parser` to `/usr/src/paperless/src/org_toweosp_paperlessngx_default_parser` for your Paperless-ngx webserver container. For example when using docker compose:
+    Place a script with the following content in the directory for your container initialization scripts and make it executable:
 
     ```
-    services:
-    [...]    
-        webserver:
-        [...]
-            volumes:
-            - <folder>/org_toweosp_paperlessngx_default_parser:/usr/src/paperless/src/org_toweosp_paperlessngx_default_parser
+    #!/bin/bash
+    pip install paperlessngx-default-parser
     ```
-4. Add the default parser to the `PAPERLESS_APPS` environment variable, e.g. 
-   `PAPERLESS_APPS="org_toweosp_paperlessngx_default_parser.apps.DefaultParserConfig"`
 
-> **Note on using the PAPERLESS_APPS environment variable**
->
->This is a comma separated list of apps you would like to add to Paperless-ngx. Pay attention to not include any spaces in between when >adding more than one app. So use e.g.
->
->`PAPERLESS_APPS="org_toweosp_paperlessngx_default_parser.apps.DefaultParserConfig,paperless_my.apps.SpecialConfig"`
->
->instead of
->
->`PAPERLESS_APPS="org_toweosp_paperlessngx_default_parser.apps.DefaultParserConfig, paperless_my.apps.SpecialConfig"`
+2. Add this parser to the `PAPERLESS_APPS` environment variable, e.g. in your `paperless.conf`:
+   `PAPERLESS_APPS="paperlessngx-default-parser.apps.DefaultParserConfig"`
 
-## Limitations
+## FAQ
 
 ### __Error: File type {mime-type} not supported__
 Paperless-ngx uses magic numbers to identify the mime type of a file which should be consumed/archived.
@@ -63,6 +47,7 @@ Since the magic numbers database and /etc/mime.types don't have to be - and in f
 Paperless-ngx identifies - by using magic numbers - a mime type which is not listed in /etc/mime.types. This results in the error _File type {mime-type} not supported_ because the default parser could not register itself for this mime type.
 
 **Solution**: Add the missing mime type to /etc/mime.types.
+
 
 ### __Error: Not consuming file {filepath}: Unknown file extension.__
 Paperless-ngx at the moment handles files differently if they are imported via the consumption directory or via UI.
@@ -95,6 +80,6 @@ For example: files of mime type _application/octet-stream_ will get file extensi
 
 ## __How to modify /etc/mime.types used by Paperless-ngx__
 For example:
-- Add missing mime types using `org_toweosp_paperlessngx_default_parser.sh` (see examples there)
+- Add missing mime types using `add_missing_mime_types.sh` (see examples there)
 - Create your own custom container initialization script to add/modify mime types.
 - Use your own mime.types file and bind it to /etc/mime.types

@@ -27,7 +27,7 @@ class DefaultDocumentParser(DocumentParser):
     Otherwise the content metadata is left empty and a pdf containing a note regarding the use of this parser is generated.
     """
 
-    logging_name = "paperless.parsing.org_toweosp_paperlessngx_default_parser"
+    logging_name = "paperless.parsing.paperlessngx_default_parser"
 
     html_note = Template(
     '''

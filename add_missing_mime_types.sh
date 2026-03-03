@@ -1,5 +1,4 @@
 #!/bin/bash
-pip install chardet
 
 # Add mime.types known by magic numbers database which are missing in /etc/mime.types
 # File extensions can be added using the following format:

@@ -1,5 +1,5 @@
 def get_parser(*args, **kwargs):
-    from org_toweosp_paperlessngx_default_parser.parsers import DefaultDocumentParser
+    from paperlessngx_default_parser.parsers import DefaultDocumentParser
 
     return DefaultDocumentParser(*args, **kwargs)
 
