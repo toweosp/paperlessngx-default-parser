@@ -46,7 +46,7 @@ Paperless-ngx identifies - by using magic numbers - a mime type which is not lis
 **Solution**: Add the missing mime type to /etc/mime.types.
 
 
-### TODO __Error: Not consuming file {filepath}: Unknown file extension.__
+### __Error: Not consuming file {filepath}: Unknown file extension.__
 Paperless-ngx at the moment handles files differently if they are imported via the consumption directory or via UI.
 
 When importing a file via UI, Paperless-ngx (solely) checks the mime type of the file using _magic_ numbers and checks if there is a parser registered for this mime type.
