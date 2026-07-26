@@ -27,7 +27,7 @@ class DefaultDocumentParser(DocumentParser):
     """
 
     name = "Paperless-ngx default parser"
-    version = "3.0.0"
+    version = "3.0.1"
     author = "toweosp"
     url = "https://github.com/toweosp/paperlessngx-default-parser"
 
