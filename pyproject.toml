@@ -1,16 +1,16 @@
 [build-system]
-requires = ["uv_build >= 0.10.0, <0.11.0"]
+requires = ["uv_build >= 0.10.0, <=0.11.32"]
 build-backend = "uv_build"
 
 [project]
 name = "paperlessngx_default_parser"
-version = "v2.0.0"
+version = "v3.0.0"
 authors = [
   { name="toweosp", email="dev@toweosp.org" },
 ]
-description = "Default parser which can be used by Paperless-ngx if there is no other suitable parser found for a given mime type."
+description = "Default parser which can be used by Paperless-ngx version 3.0.0 and above if there is no other suitable parser found for a given mime type."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.12"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Programming Language :: Python :: 3",
@@ -24,3 +24,5 @@ dependencies = ["chardet"]
 Homepage = "https://github.com/toweosp/paperlessngx-default-parser"
 Issues = "https://github.com/toweosp/paperlessngx-default-parser/issues"
 
+[project.entry-points."paperless_ngx.parsers"]
+paperlessngx_default_parser = "paperlessngx_default_parser.parsers:DefaultDocumentParser"

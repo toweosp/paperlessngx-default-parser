@@ -1,5 +1,5 @@
 # Default parser for Paperless-ngx 
-This is a default parser which can be used by [Paperless-ngx](https://docs.paperless-ngx.com/) if there is no other suitable parser found for a given mime type.
+This is a default parser which can be used by [Paperless-ngx](https://docs.paperless-ngx.com/) version 3.0.0. or above if there is no other suitable parser found for a given mime type.
 
 It allows to archive documents of all mime types, which are defined in /etc/mime.types. For every document consumed by this parser, the original file gets archived and a PDF as well as a thumbnail are generated.
 
@@ -17,21 +17,18 @@ This parser requires Gotenberg to be configured for Paperless-ngx.
 
 ## Installation
 
-1. Install using PyPI
+Install using PyPI
 
-    `pip install paperlessngx-default-parser`
+`pip install paperlessngx-default-parser`
 
-    For docker based installations use custom container initialization as described here: https://docs.paperless-ngx.com/advanced_usage/#custom-container-initialization
+For docker based installations use custom container initialization as described here: https://docs.paperless-ngx.com/advanced_usage/#custom-container-initialization
 
-    Place a script with the following content in the directory for your container initialization scripts and make it executable:
+Place a script with the following content in the directory for your container initialization scripts and make it executable:
 
-    ```
-    #!/bin/bash
-    pip install paperlessngx-default-parser
-    ```
-
-2. Add this parser to the `PAPERLESS_APPS` environment variable, e.g. in your `paperless.conf`:
-   `PAPERLESS_APPS="paperlessngx-default-parser.apps.DefaultParserConfig"`
+```
+#!/bin/bash
+pip install paperlessngx-default-parser
+```
 
 ## FAQ
 
@@ -49,7 +46,7 @@ Paperless-ngx identifies - by using magic numbers - a mime type which is not lis
 **Solution**: Add the missing mime type to /etc/mime.types.
 
 
-### __Error: Not consuming file {filepath}: Unknown file extension.__
+### TODO __Error: Not consuming file {filepath}: Unknown file extension.__
 Paperless-ngx at the moment handles files differently if they are imported via the consumption directory or via UI.
 
 When importing a file via UI, Paperless-ngx (solely) checks the mime type of the file using _magic_ numbers and checks if there is a parser registered for this mime type.
